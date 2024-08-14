@@ -13,14 +13,14 @@ class Either
     Failure = type_member(:out)
 
     sig {returns(Either[Value, Failure])}
-    attr_reader :either
+    def either; end
 
     sig {params(either: Either[Value, Failure]).void}
     def initialize(either); end
   end
 
   sig {returns(T.nilable(Symbol))}
-  attr_reader :tag
+  def tag; end
 
   sig {params(tag: T.nilable(Symbol)).void}
   def initialize(tag = nil); end
@@ -92,7 +92,7 @@ class Ok < Either
   Failure = type_member(:out) { { fixed: T.noreturn } }
 
   sig {override.returns(Value)}
-  attr_reader :value
+  def value; end
 
   sig {
     type_parameters(:T)
@@ -154,7 +154,7 @@ class Err < Either
   Failure = type_member(:out) { { upper: T.anything } }
 
   sig {override.returns(Failure)}
-  attr_reader :failure
+  def failure; end
 
   sig {
     type_parameters(:T)

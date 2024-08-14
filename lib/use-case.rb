@@ -1,4 +1,10 @@
 # typed: true
+
+begin
+  require "sorbet-runtime"
+rescue LoadError
+end
+
 require "either"
 require "ok"
 require "err"

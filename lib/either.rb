@@ -1,5 +1,7 @@
 # typed: true
 class Either
+  extend T::Generic if defined?(T)
+
   class UnavailableAttributeError < StandardError
     attr_reader :either
 

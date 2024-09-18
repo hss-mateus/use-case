@@ -1,31 +1,27 @@
-{ pkgs, ... }:
-
+{
+  pkgs,
+  ruby-nix,
+  bundix,
+  ...
+}:
 with pkgs;
+let
+  rubyNix = ruby-nix.lib pkgs {
+    gemset = ./gemset.nix;
+    ruby = ruby_3_3;
+    gemConfig = defaultGemConfig;
+  };
+in
 {
   packages = [
+    bundix.packages.${stdenv.system}.default
     editorconfig-core-c
     git
-    readline
+    rubyNix.env
     watchman
   ];
 
-  languages.ruby = {
-    enable = true;
-    bundler.enable = false;
-    versionFile = ./.ruby-version;
-  };
-
-  enterShell = ''
-    export PATH="$PATH:$(gem env home)/bin"
-
-    bundle check || bundle install
-
-    srb_path=$(bundle show sorbet-static)
-
-    if [ ! -f $srb_path/.patched ]; then
-      chmod 777 $srb_path/libexec/sorbet
-      patchelf --set-interpreter ${glibc}/lib64/ld-linux-x86-64.so.2 $srb_path/libexec/sorbet
-      touch $srb_path/.patched
-    fi
-  '';
+  env.RUBY_YJIT_ENABLE = 1;
+  enterTest = "rake";
+  cachix.enable = false;
 }

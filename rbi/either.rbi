@@ -44,12 +44,7 @@ class Either
     abstract
       .type_parameters(:T)
       .params(block: T.proc.params(value_or_failure: T.any(Value, Failure)).returns(T.type_parameter(:T)))
-      .returns(
-        T.any(
-          Either[T.any(Value, T.type_parameter(:T)), Failure],
-          Either[Value, T.any(Failure, T.type_parameter(:T))]
-        )
-      )
+      .returns(Either[T.type_parameter(:T), T.type_parameter(:T)])
   }
   def map(&block); end
 
@@ -57,7 +52,7 @@ class Either
     abstract
       .type_parameters(:T)
       .params(block: T.proc.params(value: Value).returns(T.type_parameter(:T)))
-      .returns(Either[T.any(Value, T.type_parameter(:T)), Failure])
+      .returns(Either[T.type_parameter(:T), Failure])
   }
   def map_ok(&block); end
 
@@ -65,7 +60,7 @@ class Either
     abstract
       .type_parameters(:T)
       .params(block: T.proc.params(failure: Failure).returns(T.type_parameter(:T)))
-      .returns(Either[Value, T.any(T.type_parameter(:T), Failure)])
+      .returns(Either[Value, T.type_parameter(:T)])
   }
   def map_err(&block); end
 
@@ -120,15 +115,15 @@ class Ok < Either
     override
       .type_parameters(:A, :B)
       .params(block: T.proc.params(value: Value).returns(Either[T.type_parameter(:A), T.type_parameter(:B)]))
-      .returns(Either[T.type_parameter(:A), T.any(Failure, T.type_parameter(:B))])
+      .returns(Either[T.type_parameter(:A), T.type_parameter(:B)])
   }
   def then(&block); end
 
   sig {
     override
       .type_parameters(:T)
-      .params(block: T.proc.params(value: T.any(Value, Failure)).returns(T.type_parameter(:T)))
-      .returns(Ok[T.any(T.type_parameter(:T), Value)])
+      .params(block: T.proc.params(value: Value).returns(T.type_parameter(:T)))
+      .returns(Ok[T.type_parameter(:T)])
   }
   def map(&block); end
 
@@ -136,14 +131,13 @@ class Ok < Either
     override
       .type_parameters(:T)
       .params(block: T.proc.params(value: Value).returns(T.type_parameter(:T)))
-      .returns(Ok[T.any(T.type_parameter(:T), Value)])
+      .returns(Ok[T.type_parameter(:T)])
   }
   def map_ok(&block); end
 
   sig {
     override
-      .type_parameters(:T)
-      .params(_block: T.proc.params(failure: Failure).returns(T.type_parameter(:T)))
+      .params(_block: T.proc.params(failure: Failure).returns(T.anything))
       .returns(Ok[Value])
   }
   def map_err(&_block); end
@@ -180,9 +174,8 @@ class Err < Either
 
   sig {
     override
-      .type_parameters(:A, :B)
-      .params(_block: T.proc.params(value: Value).returns(Either[T.type_parameter(:A), T.type_parameter(:B)]))
-      .returns(Either[T.type_parameter(:A), T.any(Failure, T.type_parameter(:B))])
+      .params(_block: T.proc.params(value: Value).returns(Either[T.anything, T.anything]))
+      .returns(Err[Failure])
   }
   def then(&_block); end
 
@@ -196,8 +189,7 @@ class Err < Either
 
   sig {
     override
-      .type_parameters(:T)
-      .params(_block: T.proc.params(value: Value).returns(T.type_parameter(:T)))
+      .params(_block: T.proc.params(value: Value).returns(T.anything))
       .returns(Err[Failure])
   }
   def map_ok(&_block); end

@@ -1,5 +1,7 @@
 # typed: strong
 class UseCase
+  extend T::Sig
+
   # sig {
   #   type_parameters(:T)
   #     .params(value: T.type_parameter(:T), tag: T.nilable(Symbol))

@@ -6,10 +6,10 @@ rescue LoadError
 end
 
 require "either"
-require "ok"
-require "err"
 
 class UseCase
+  extend T::Sig if defined?(T)
+
   class << self
     def to_proc
       ->(*args, **kwargs, &block) { call(*args, **kwargs, &block) }

@@ -35,7 +35,7 @@ require "either"
 #   Divide.new.call(2, 3)
 #   Divide.to_proc.call(2, 3)
 #
-#   Divide[2, 3].then(&Increment)
+#   Divide[2, 3].pipe(&Increment)
 #
 # = Sorbet
 #
@@ -94,7 +94,7 @@ require "either"
 #
 #   Increment["foo"]           # Expected `Integer` but found `String("foo")` for argument `value`
 #   Increment[2, 3]            # Too many arguments provided for method `Increment.[]`. Expected: `1`, got: `2`
-#   Increment[2].then(&Divide) # Expected `T.proc.params(arg0: Integer).returns(Either[T.anything, T.anything])`
+#   Increment[2].pipe(&Divide) # Expected `T.proc.params(arg0: Integer).returns(Either[T.anything, T.anything])`
 #                              # but found `T.proc.params(arg0: Integer, arg1: Integer).returns(Either[Integer, String])` for block argument
 class UseCase
   extend T::Sig if defined?(T)

@@ -14,9 +14,9 @@ end
 #     .map_ok      { |value| value.to_f }                                     # => Either[Float, String]
 #     .map_err     { |failure| failure.to_sym }                               # => Either[Float, Symbol]
 #     .map         { |value_or_failure| value_or_failure.to_s }               # => Either[String, String]
-#     .then        { |value| Ok.new(value.to_i) }                             # => Either[Integer, String]
-#     .then        { |value| rand(2).even? ? Ok.new(value) : Err.new(99.9) }  # => Either[Integer, T.any(String, Float)]
-#     .then        { |value| Ok.new(value, :tag) }                            # => Either[Integer, T.any(String, Float)]
+#     .pipe        { |value| Ok.new(value.to_i) }                             # => Either[Integer, String]
+#     .pipe        { |value| rand(2).even? ? Ok.new(value) : Err.new(99.9) }  # => Either[Integer, T.any(String, Float)]
+#     .pipe        { |value| Ok.new(value, :tag) }                            # => Either[Integer, T.any(String, Float)]
 #     .on_ok       { |value| puts "the value is: #{value}" }                  # => Either[Integer, T.any(String, Float)]
 #     .on_err      { |failure| puts "the failure is: #{failure}" }            # => Either[Integer, T.any(String, Float)]
 #     .on_ok(:tag) { |value| puts "a tag was matched!" }                      # => Either[Integer, T.any(String, Float)]
@@ -95,11 +95,11 @@ class Either
   # result returned from the block.
   # Otherwise, the block doesn't get executed and the value is returned as-is.
   #
-  #    Ok.new(2).then { |x|  Ok(x.to_s) } # => Ok("2")
-  #    Ok.new(2).then { |x| Err(x.to_s) } # => Err("2")
-  #   Err.new(2).then { |x|  Ok(x.to_s) } # => Err(2)
-  #   Err.new(2).then { |x| Err(x.to_s) } # => Err(2)
-  def then(&block); end
+  #    Ok.new(2).pipe { |x|  Ok(x.to_s) } # => Ok("2")
+  #    Ok.new(2).pipe { |x| Err(x.to_s) } # => Err("2")
+  #   Err.new(2).pipe { |x|  Ok(x.to_s) } # => Err(2)
+  #   Err.new(2).pipe { |x| Err(x.to_s) } # => Err(2)
+  def pipe(&block); end
 
   # When an instance of `Ok`, passes `value` to block.
   # Otherwise, the block doesn't get executed.
@@ -163,7 +163,7 @@ class Ok < Either
 
   def err? = false
 
-  def then(&block) = block.call(value)
+  def pipe(&block) = block.call(value)
 
   def map(&block) = map_ok(&block)
 
@@ -193,7 +193,7 @@ class Err < Either
 
   def err? = true
 
-  def then(&_block) = self
+  def pipe(&_block) = self
 
   def map(&block) = map_err(&block)
 

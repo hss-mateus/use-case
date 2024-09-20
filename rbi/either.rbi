@@ -70,7 +70,7 @@ class Either
       .params(block: T.proc.params(value: Value).returns(Either[T.type_parameter(:A), T.type_parameter(:B)]))
       .returns(Either[T.type_parameter(:A), T.any(Failure, T.type_parameter(:B))])
   }
-  def then(&block); end
+  def pipe(&block); end
 
   sig {params(tags: Symbol, block: T.proc.params(value: Value).void).returns(T.self_type)}
   def on_ok(*tags, &block); end
@@ -117,7 +117,7 @@ class Ok < Either
       .params(block: T.proc.params(value: Value).returns(Either[T.type_parameter(:A), T.type_parameter(:B)]))
       .returns(Either[T.type_parameter(:A), T.type_parameter(:B)])
   }
-  def then(&block); end
+  def pipe(&block); end
 
   sig {
     override
@@ -177,7 +177,7 @@ class Err < Either
       .params(_block: T.proc.params(value: Value).returns(Either[T.anything, T.anything]))
       .returns(Err[Failure])
   }
-  def then(&_block); end
+  def pipe(&_block); end
 
   sig {
     override

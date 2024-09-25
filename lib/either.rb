@@ -101,6 +101,16 @@ class Either
   #   Err.new(2).pipe { |x| Err(x.to_s) } # => Err(2)
   def pipe(&block); end
 
+  # When an instance of `Err`, passes `failure` to block, and returns the
+  # `Either` result returned from the block.
+  # Otherwise, the block doesn't get executed and the value is returned as-is.
+  #
+  #    Ok.new(2).or { |x|  Ok(x.to_s) } # => Ok(2)
+  #    Ok.new(2).or { |x| Err(x.to_s) } # => Ok(2)
+  #   Err.new(2).or { |x|  Ok(x.to_s) } # => Ok("2")
+  #   Err.new(2).or { |x| Err(x.to_s) } # => Err("2")
+  def or(&block); end
+
   # When an instance of `Ok`, passes `value` to block.
   # Otherwise, the block doesn't get executed.
   # If `tags` are specified, the block gets executed only if a tag is matched.
@@ -165,6 +175,8 @@ class Ok < Either
 
   def pipe(&block) = block.call(value)
 
+  def or(&_block) = self
+
   def map(&block) = map_ok(&block)
 
   def map_ok(&block)
@@ -194,6 +206,8 @@ class Err < Either
   def err? = true
 
   def pipe(&_block) = self
+
+  def or(&block) = block.call(failure)
 
   def map(&block) = map_err(&block)
 

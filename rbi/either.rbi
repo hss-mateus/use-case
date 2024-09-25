@@ -72,6 +72,14 @@ class Either
   }
   def pipe(&block); end
 
+  sig {
+    abstract
+      .type_parameters(:A, :B)
+      .params(block: T.proc.params(failure: Failure).returns(Either[T.type_parameter(:A), T.type_parameter(:B)]))
+      .returns(Either[T.any(Value, T.type_parameter(:A)), T.type_parameter(:B)])
+  }
+  def or(&block); end
+
   sig {params(tags: Symbol, block: T.proc.params(value: Value).void).returns(T.self_type)}
   def on_ok(*tags, &block); end
 
@@ -118,6 +126,13 @@ class Ok < Either
       .returns(Either[T.type_parameter(:A), T.type_parameter(:B)])
   }
   def pipe(&block); end
+
+  sig {
+    override
+      .params(block: T.proc.params(failure: Failure).returns(Either[T.anything, T.anything]))
+      .returns(Ok[Value])
+  }
+  def or(&block); end
 
   sig {
     override
@@ -178,6 +193,14 @@ class Err < Either
       .returns(Err[Failure])
   }
   def pipe(&_block); end
+
+  sig {
+    override
+      .type_parameters(:A, :B)
+      .params(block: T.proc.params(failure: Failure).returns(Either[T.type_parameter(:A), T.type_parameter(:B)]))
+      .returns(Either[T.any(Value, T.type_parameter(:A)), T.type_parameter(:B)])
+  }
+  def or(&block); end
 
   sig {
     override

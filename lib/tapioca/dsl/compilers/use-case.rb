@@ -28,6 +28,11 @@ module Tapioca
             return_type: sanitize_signature_types(T::Types::Proc.new(types, ret).to_s),
             class_method: true
           )
+
+          if defined?(::ActiveJob)
+            klass.create_class("Job", superclass_name: ::UseCase.job_class.to_s)
+            klass.create_method("call_later", parameters:, return_type: "#{constant}::Job", class_method: true)
+          end
         end
       end
 

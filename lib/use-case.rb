@@ -111,6 +111,25 @@ class UseCase
     def call(...)
       T.unsafe(new).call(...)
     end
+
+    if defined?(::ActiveJob)
+      def call_later(...) = const_get(:Job).perform_later(...)
+
+      def job_class = @job_class ||= ::ActiveJob::Base
+
+      def job_class=(klass)
+        @job_class = klass
+      end
+
+      def inherited(subclass)
+        subclass.class_eval do
+          job = subclass.const_set(:Job, Class.new(job_class))
+          job.define_method(:perform) do |*args, **kwargs, &block|
+            subclass.call(*args, **kwargs, &block)
+          end
+        end
+      end
+    end
   end
 
   # def Ok(value, tag = nil) = Ok.new(value, tag)

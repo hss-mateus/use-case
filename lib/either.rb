@@ -36,6 +36,12 @@ class Either
     @tag = tag
   end
 
+  # Creates a new copy, with `tag` changed
+  #
+  #   result = Ok.new(2)    # => Ok(2)
+  #   result.with_tag(:foo) # => Ok(2, :foo)
+  def with_tag(tag); end
+
   # When an instance of `Ok`, returns the underlying value.
   # Otherwise, raises `UnavailableAttributeError`.
   #
@@ -165,6 +171,8 @@ class Ok < Either
     @value = value
   end
 
+  def with_tag(tag) = self.class.new(value, tag)
+
   def failure = raise UnavailableAttributeError, self
 
   def value_or_failure = value
@@ -196,6 +204,8 @@ class Err < Either
 
     @failure = failure
   end
+
+  def with_tag(tag) = self.class.new(failure, tag)
 
   def value = raise UnavailableAttributeError, self
 

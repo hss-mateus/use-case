@@ -25,6 +25,9 @@ class Either
   sig {params(tag: T.nilable(Symbol)).void}
   def initialize(tag = nil); end
 
+  sig {abstract.params(tag: T.nilable(Symbol)).returns(T.self_type)}
+  def with_tag(tag); end
+
   sig {abstract.returns(Value)}
   def value; end
 
@@ -107,6 +110,9 @@ class Ok < Either
   sig {params(value: Value, tag: T.nilable(Symbol)).void}
   def initialize(value, tag = nil); end
 
+  sig {override.params(tag: T.nilable(Symbol)).returns(T.self_type)}
+  def with_tag(tag); end
+
   sig {override.returns(T.noreturn)}
   def failure; end
 
@@ -174,6 +180,9 @@ class Err < Either
 
   sig {params(failure: Failure, tag: T.nilable(Symbol)).void}
   def initialize(failure, tag = nil); end
+
+  sig {override.params(tag: T.nilable(Symbol)).returns(T.self_type)}
+  def with_tag(tag); end
 
   sig {override.returns(T.noreturn)}
   def value; end

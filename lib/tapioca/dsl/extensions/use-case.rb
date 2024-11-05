@@ -98,10 +98,13 @@ module Tapioca
       attr_accessor :__tapioca_use_cases
 
       def old_inherited(subclass)
+        meta = Metadata.new(subclass)
         @__tapioca_use_cases ||= {}
-        @__tapioca_use_cases[subclass] = Metadata.new(subclass)
+        @__tapioca_use_cases[subclass] = meta
 
         super
+
+        meta.job.undef_method :perform if defined?(::ActiveJob)
       end
 
       ::UseCase.singleton_class.prepend(self)

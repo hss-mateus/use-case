@@ -33,8 +33,6 @@ module Tapioca
               job_klass.create_method("perform_now", parameters: meta.params, return_type: meta.return_type, class_method: true)
               job_klass.create_method("perform_later", parameters: meta.params, return_type: meta.later_return_type, class_method: true)
             end
-
-            meta.job.undef_method(:perform)
           end
         end
       end

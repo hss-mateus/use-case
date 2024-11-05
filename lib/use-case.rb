@@ -1,7 +1,8 @@
-# typed: true
+# typed: false
 
 begin
   require "sorbet-runtime"
+  require "active_job"
 rescue LoadError
 end
 
@@ -100,17 +101,9 @@ class UseCase
   extend T::Sig if defined?(T)
 
   class << self
-    def to_proc
-      ->(*args, **kwargs, &block) { call(*args, **kwargs, &block) }
-    end
-
-    def [](...)
-      T.unsafe(new).call(...)
-    end
-
-    def call(...)
-      T.unsafe(new).call(...)
-    end
+    def call(...) = new.call(...)
+    def [](...) = call(...)
+    def to_proc = method(:call).to_proc
 
     if defined?(::ActiveJob)
       def call_later(...) = const_get(:Job).perform_later(...)
@@ -122,11 +115,17 @@ class UseCase
       end
 
       def inherited(subclass)
-        subclass.class_eval do
-          job = subclass.const_set(:Job, Class.new(job_class))
-          job.define_method(:perform) do |*args, **kwargs, &block|
-            subclass.call(*args, **kwargs, &block)
+        job = subclass.const_set(
+          :Job,
+          Class.new(UseCase.job_class) do
+            class << self
+              alias configure class_eval
+            end
           end
+        )
+
+        job.define_method(:perform) do |*args, **kwargs, &block|
+          subclass.call(*args, **kwargs, &block)
         end
       end
     end

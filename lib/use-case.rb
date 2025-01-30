@@ -130,7 +130,4 @@ class UseCase
       end
     end
   end
-
-  # def Ok(value, tag = nil) = Ok.new(value, tag)
-  # def Err(failure, tag = nil) = Err.new(failure, tag)
 end

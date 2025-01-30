@@ -97,7 +97,7 @@ module Tapioca
 
       attr_accessor :__tapioca_use_cases
 
-      def old_inherited(subclass)
+      def inherited(subclass)
         meta = Metadata.new(subclass)
         @__tapioca_use_cases ||= {}
         @__tapioca_use_cases[subclass] = meta

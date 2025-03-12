@@ -21,8 +21,13 @@ module Tapioca
 
         sig {returns(T.untyped)}
         def signature
-          @signature ||= T::Utils.signature_for_instance_method(constant, :call) ||
-                         T.unsafe(T::Private::Methods::Signature).new_untyped(method: constant.instance_method(:call))
+          @signature ||=
+            begin
+              eval_rbs_if_needed
+
+              T::Utils.signature_for_instance_method(constant, :call) ||
+                T.unsafe(T::Private::Methods::Signature).new_untyped(method: constant.instance_method(:call))
+            end
         end
 
         sig {returns(UnboundMethod)}
@@ -92,6 +97,22 @@ module Tapioca
         sig {returns(T::Array[RBI::TypedParam])}
         def job_configure_params
           [create_block_param("block", type: "T.proc.bind(T.class_of(#{job})).void")]
+        end
+
+        def eval_rbs_if_needed
+          return if T::Utils.signature_for_instance_method(constant, :call)
+
+          method = constant.instance_method(:call)
+          src, line = T.must(method.source_location)
+          rbs_str = File.open(src).readlines[line - 2]&.strip&.delete_prefix("#:")
+          type = ::RBS::Parser.parse_method_type(rbs_str)
+
+          return unless type
+
+          rbi = ::RBI::RBS::MethodTypeTranslator.translate(::RBI::Method.new("dummy"), type)
+
+          constant.class_eval(rbi.string)
+          T.unsafe(T::Private::Methods)._on_method_added(constant, constant, :call)
         end
       end
 

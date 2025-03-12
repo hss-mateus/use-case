@@ -12,7 +12,7 @@ module Tapioca
 
       sig {override.returns(T::Enumerable[T.class_of(::UseCase)])}
       def self.gather_constants
-        T.unsafe(::UseCase).__tapioca_use_cases.keys
+        T.unsafe(::UseCase).__tapioca_use_cases&.keys || []
       end
 
       sig {override.void}

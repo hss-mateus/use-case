@@ -4,5 +4,5 @@
 
 # typed: false
 
+module ::ActiveJob::Base; end
 module T::Private::Methods::Signature; end
-class ActiveJob::Base; end

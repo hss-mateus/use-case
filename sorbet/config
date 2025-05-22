@@ -3,3 +3,5 @@
 --ignore=.devenv
 --ignore=.direnv
 --ignore=test/
+--enable-experimental-rbs-comments
+--enable-all-beta-lsp-features

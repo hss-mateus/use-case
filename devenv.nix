@@ -2,13 +2,14 @@
   pkgs,
   ruby-nix,
   bundix,
+  nixpkgs-ruby,
   ...
 }:
 with pkgs;
 let
   rubyNix = ruby-nix.lib pkgs {
     gemset = ./gemset.nix;
-    ruby = ruby_3_3;
+    ruby = nixpkgs-ruby.packages.${system}."ruby-3.4.3";
     gemConfig = defaultGemConfig;
   };
 in

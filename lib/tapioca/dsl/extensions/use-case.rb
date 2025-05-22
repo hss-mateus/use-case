@@ -1,7 +1,8 @@
-# typed: false
+# typed: strict
 module Tapioca
   module Extensions
     module UseCase
+      #: (::UseCase subclass) -> void
       def inherited(subclass)
         super
 
@@ -9,7 +10,8 @@ module Tapioca
       end
 
       if defined?(::ActiveSupport)
-        ::ActiveSupport.on_load(:active_job) do
+        ::ActiveSupport #: as untyped
+          .on_load(:active_job) do
           ::UseCase.singleton_class.prepend(::Tapioca::Extensions::UseCase)
         end
       end

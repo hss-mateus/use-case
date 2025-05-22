@@ -1,11 +1,4 @@
-# typed: true
-if defined?(T)
-  class Either
-    extend T::Generic
-
-    sealed!
-  end
-end
+# typed: strong
 
 # An utility class for handling computations that can fail.
 #
@@ -20,18 +13,27 @@ end
 #     .on_ok       { |value| puts "the value is: #{value}" }                  # => Either[Integer, T.any(String, Float)]
 #     .on_err      { |failure| puts "the failure is: #{failure}" }            # => Either[Integer, T.any(String, Float)]
 #     .on_ok(:tag) { |value| puts "a tag was matched!" }                      # => Either[Integer, T.any(String, Float)]
+#
+# @sealed
+# @abstract
+#: [out Value < top, out Failure < top]
 class Either
+  #: [Value, Failure]
   class UnavailableAttributeError < StandardError
+    #: Either[Value, Failure]
     attr_reader :either
 
+    #: (Either[Value, Failure] either) -> void
     def initialize(either)
       super
       @either = either
     end
   end
 
+  #: Symbol?
   attr_reader :tag
 
+  #: (?Symbol? tag) -> void
   def initialize(tag = nil)
     @tag = tag
   end
@@ -40,6 +42,9 @@ class Either
   #
   #   result = Ok.new(2)    # => Ok(2)
   #   result.with_tag(:foo) # => Ok(2, :foo)
+  #
+  # @abstract
+  #: (Symbol? tag) -> self
   def with_tag(tag); end
 
   # When an instance of `Ok`, returns the underlying value.
@@ -47,6 +52,9 @@ class Either
   #
   #    Ok.new(2).value # => 2
   #   Err.new(2).value # => UnavailableAttributeError
+  #
+  # @abstract
+  #: -> Value
   def value; end
 
   # When an instance of `Err`, returns the underlying value.
@@ -54,24 +62,36 @@ class Either
   #
   #    Ok.new(2).value # => UnavailableAttributeError
   #   Err.new(2).value # => 2
+  #
+  # @abstract
+  #: -> Failure
   def failure; end
 
   # Returns the underlying value.
   #
   #    Ok.new(2).value_or_failure # => 2
   #   Err.new(2).value_or_failure # => 2
+  #
+  # @abstract
+  #: -> (Value | Failure)
   def value_or_failure; end
 
   # Is an instance of `Ok`?
   #
   #    Ok.new(2).ok? # => true
   #   Err.new(2).ok? # => false
+  #
+  # @abstract
+  #: -> bool
   def ok?; end
 
   # Is an instance of `Err`?
   #
   #    Ok.new(2).ok? # => true
   #   Err.new(2).ok? # => false
+  #
+  # @abstract
+  #: -> bool
   def err?; end
 
   # Passes `value_or_failure` to `block`, and returns the corresponding
@@ -79,6 +99,9 @@ class Either
   #
   #    Ok.new(2).map { |x| x.to_s } # => Ok("2")
   #   Err.new(2).map { |x| x.to_s } # => Err("2")
+  #
+  # @abstract
+  #: [T] { (Value | Failure value_or_failure) -> T } -> Either[T, T]
   def map(&block); end
 
   # When an instance of `Ok`, passes `value` to block, and returns a new `Ok`,
@@ -87,6 +110,9 @@ class Either
   #
   #    Ok.new(2).map_ok { |x| x.to_s } # => Ok("2")
   #   Err.new(2).map_ok { |x| x.to_s } # => Err(2)
+  #
+  # @abstract
+  #: [T] { (Value value) -> T } -> Either[T, Failure]
   def map_ok(&block); end
 
   # When an instance of `Err`, passes `value` to block, and returns a new `Err`,
@@ -95,6 +121,9 @@ class Either
   #
   #    Ok.new(2).map_err { |x| x.to_s } # => Ok(2)
   #   Err.new(2).map_err { |x| x.to_s } # => Err("2")
+  #
+  # @abstract
+  #: [T] { (Failure failure) -> T } -> Either[Value, T]
   def map_err(&block); end
 
   # When an instance of `Ok`, passes `value` to block, and returns the `Either`
@@ -105,6 +134,9 @@ class Either
   #    Ok.new(2).pipe { |x| Err(x.to_s) } # => Err("2")
   #   Err.new(2).pipe { |x|  Ok(x.to_s) } # => Err(2)
   #   Err.new(2).pipe { |x| Err(x.to_s) } # => Err(2)
+  #
+  # @abstract
+  #: [A, B] { (Value value) -> Either[A, B] } -> Either[A, (Failure | B)]
   def pipe(&block); end
 
   # When an instance of `Err`, passes `failure` to block, and returns the
@@ -115,6 +147,9 @@ class Either
   #    Ok.new(2).or { |x| Err(x.to_s) } # => Ok(2)
   #   Err.new(2).or { |x|  Ok(x.to_s) } # => Ok("2")
   #   Err.new(2).or { |x| Err(x.to_s) } # => Err("2")
+  #
+  # @abstract
+  #: [A, B] { (Failure failure) -> Either[A, B] } -> Either[Value | A, B]
   def or(&block); end
 
   # When an instance of `Ok`, passes `value` to block.
@@ -131,6 +166,8 @@ class Either
   #    ok.on_ok(:bar, :baz, &block) # =>  Ok(2, :foo) | no output
   #   err.on_ok(&block)             # => Err(2, :foo) | no output
   #   err.on_ok(:foo, :bar, &block) # => Err(2, :foo) | no output
+  #
+  #: (*Symbol tags) { (Value value) -> void } -> self
   def on_ok(*tags, &block)
     map_ok(&block) if tags_match?(tags)
 
@@ -151,6 +188,8 @@ class Either
   #   err.on_err(&block)             # => Err(2, :foo) | "oops! 2"
   #   err.on_err(:foo, :bar, &block) # => Err(2, :foo) | "oops! 2"
   #   err.on_err(:bar, :baz, &block) # => Err(2, :foo) | no output
+  #
+  #: (*Symbol tags) { (Failure failure) -> void } -> self
   def on_err(*tags, &block)
     map_err(&block) if tags_match?(tags)
 
@@ -159,73 +198,126 @@ class Either
 
   private
 
+  #: (Array[Symbol] tags) -> bool
   def tags_match?(tags) = tags.none? || tags.include?(tag)
 end
 
+#: [out Value < top, out Failure = bot]
 class Ok < Either
+  #: Value
   attr_reader :value
 
+  #: [T] (T value, ?Symbol? tag) -> Ok[T]
+  def self.new(value, tag = nil) = super #: as Ok[T]
+
+  #: (Value value, ?Symbol? tag) -> void
   def initialize(value, tag = nil)
     super(tag)
 
     @value = value
   end
 
+  # @override
+  #: (Symbol? tag) -> self
   def with_tag(tag) = self.class.new(value, tag)
 
+  # @override
+  #: -> bot
   def failure = raise UnavailableAttributeError, self
 
+  # @override
+  #: -> Value
   def value_or_failure = value
 
+  # @override
+  #: -> bool
   def ok? = true
 
+  # @override
+  #: -> bool
   def err? = false
 
+  # @override
+  #: [A, B] { (Value value) -> Either[A, B] } -> Either[A, B]
   def pipe(&block) = block.call(value)
 
+  # @override
+  #: [A, B] { (Failure failure) -> Either[A, B] } -> Ok[Value | A]
   def or(&_block) = self
 
+  # @override
+  #: [T] { (Value value) -> T } -> Ok[T]
   def map(&block) = map_ok(&block)
 
+  # @override
+  #: [T] { (Value value) -> T } -> Ok[T]
   def map_ok(&block)
     new_value = block.call(value)
 
-    self.class.new(new_value, tag)
+    Ok.new(new_value, tag)
   end
 
+  # @override
+  #: [T] { (Failure failure) -> T } -> Ok[Value]
   def map_err(&_block) = self
 end
 
+#: [out Value < bot, out Failure < top]
 class Err < Either
+  #: Failure
   attr_reader :failure
 
+  #: [T] (T value, ?Symbol? tag) -> Err[bot, T]
+  def self.new(value, tag = nil) = super #: as Err[bot, T]
+
+  #: (Failure failure, ?Symbol? tag) -> void
   def initialize(failure, tag = nil)
     super(tag)
 
     @failure = failure
   end
 
-  def with_tag(tag) = self.class.new(failure, tag)
+  # @override
+  #: (Symbol? tag) -> self
+  def with_tag(tag) = Err.new(failure, tag)
 
+  # @override
+  #: -> bot
   def value = raise UnavailableAttributeError, self
 
+  # @override
+  #: -> Failure
   def value_or_failure = failure
 
+  # @override
+  #: -> bool
   def ok? = false
 
+  # @override
+  #: -> bool
   def err? = true
 
-  def pipe(&_block) = self
+  # @override
+  #: [A, B] { (Value value) -> Either[A, B] } -> Err[bot, Failure | B]
+  def pipe(&_block) = self #: as Err[bot, Failure]
 
+  # @override
+  #: [A, B] { (Failure failure) -> Either[A, B] } -> Either[A, B]
   def or(&block) = block.call(failure)
 
+  # @override
+  #: [T] { (Failure failure) -> T } -> Err[bot, T]
   def map(&block) = map_err(&block)
 
-  def map_ok(&_block) = self
+  # @override
+  #: [T] { (Value value) -> T } -> Err[bot, Failure]
+  def map_ok(&_block) = self #: as Err[bot, Failure]
 
+  # @override
+  #: [T] { (Failure failure) -> T } -> Err[bot, T]
   def map_err(&block)
     new_failure = block.call(failure)
 
-    self.class.new(new_failure, tag)
+    Err.new(new_failure, tag)
   end
 end

@@ -11,5 +11,4 @@ group :development do
   gem "sorbet"
   gem "sorbet-runtime"
   gem "ruby-lsp", require: false
-  gem "rubocop-ast", require: false
 end

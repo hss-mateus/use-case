@@ -2403,6 +2403,7 @@ end
 # source://rbs//lib/rbs/collection/sources/rubygems.rb#9
 class RBS::Collection::Sources::Rubygems
   include ::RBS::Collection::Sources::Base
+  include ::Singleton::SingletonInstanceMethods
   include ::Singleton
   extend ::Singleton::SingletonClassMethods
 
@@ -2441,6 +2442,7 @@ end
 # source://rbs//lib/rbs/collection/sources/stdlib.rb#9
 class RBS::Collection::Sources::Stdlib
   include ::RBS::Collection::Sources::Base
+  include ::Singleton::SingletonInstanceMethods
   include ::Singleton
   extend ::Singleton::SingletonClassMethods
 

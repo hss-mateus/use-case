@@ -1,11 +1,4 @@
 # typed: false
-
-begin
-  require "sorbet-runtime"
-  require "active_job"
-rescue LoadError
-end
-
 require "either"
 
 # Utility class to be used within `Result` methods.
@@ -98,36 +91,41 @@ require "either"
 #   Increment[2].pipe(&Divide) # Expected `T.proc.params(arg0: Integer).returns(Either[T.anything, T.anything])`
 #                              # but found `T.proc.params(arg0: Integer, arg1: Integer).returns(Either[Integer, String])` for block argument
 class UseCase
-  extend T::Sig if defined?(T)
-
   class << self
     def call(...) = new.call(...)
     def [](...) = call(...)
     def to_proc = method(:call).to_proc
+  end
 
-    if defined?(::ActiveJob)
-      def call_later(...) = const_get(:Job).perform_later(...)
+  module ActiveJobExtensions
+    def call_later(...) = const_get(:Job).perform_later(...)
 
-      def job_class = @job_class ||= ::ActiveJob::Base
+    def job_class = @job_class ||= ::ActiveJob::Base
 
-      def job_class=(klass)
-        @job_class = klass
-      end
+    def job_class=(klass)
+      @job_class = klass
+    end
 
-      def inherited(subclass)
-        job = subclass.const_set(
-          :Job,
-          Class.new(UseCase.job_class) do
-            class << self
-              alias configure class_eval
-            end
+    def inherited(subclass)
+      job = subclass.const_set(
+        :Job,
+        Class.new(UseCase.job_class) do
+          class << self
+            alias configure class_eval
           end
-        )
-
-        job.define_method(:perform) do |*args, **kwargs, &block|
-          subclass.call(*args, **kwargs, &block)
         end
+      )
+
+      job.define_method(:perform) do |*args, **kwargs, &block|
+        subclass.call(*args, **kwargs, &block)
       end
     end
   end
+
+  if defined?(::ActiveSupport)
+    ::ActiveSupport.on_load(:active_job) do
+      ::UseCase.extend(ActiveJobExtensions)
+    end
+  end
 end
+

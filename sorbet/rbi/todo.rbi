@@ -5,4 +5,4 @@
 # typed: false
 
 module ::ActiveJob::Base; end
-module T::Private::Methods::Signature; end
+module ::ActiveSupport; end

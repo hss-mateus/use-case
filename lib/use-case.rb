@@ -39,14 +39,14 @@ require "either"
 # For example, given the following annotations:
 #
 #   class Increment < UseCase
-#     sig {params(value: Integer).returns(Ok[Integer])}
+#     #: (Integer value) -> Ok[Integer]
 #     def call(value)
 #       # ...
 #     end
 #   end
 #
 #   class Divide < UseCase
-#     sig {params(a: Integer, b: Integer).returns(Either[Integer, String])}
+#     #: (Integer a, Integer b) -> Either[Integer, String]
 #     def call(a, b)
 #       # ...
 #     end

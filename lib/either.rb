@@ -3,16 +3,16 @@
 # An utility class for handling computations that can fail.
 #
 #   [Ok.new(2), Err.new("message")]
-#     .sample                                                                 # => Either[Integer, String]
-#     .map_ok      { |value| value.to_f }                                     # => Either[Float, String]
-#     .map_err     { |failure| failure.to_sym }                               # => Either[Float, Symbol]
-#     .map         { |value_or_failure| value_or_failure.to_s }               # => Either[String, String]
-#     .pipe        { |value| Ok.new(value.to_i) }                             # => Either[Integer, String]
-#     .pipe        { |value| rand(2).even? ? Ok.new(value) : Err.new(99.9) }  # => Either[Integer, T.any(String, Float)]
-#     .pipe        { |value| Ok.new(value, :tag) }                            # => Either[Integer, T.any(String, Float)]
-#     .on_ok       { |value| puts "the value is: #{value}" }                  # => Either[Integer, T.any(String, Float)]
-#     .on_err      { |failure| puts "the failure is: #{failure}" }            # => Either[Integer, T.any(String, Float)]
-#     .on_ok(:tag) { |value| puts "a tag was matched!" }                      # => Either[Integer, T.any(String, Float)]
+#     .sample                                                                 #: Either[Integer, String]
+#     .map_ok      { |value| value.to_f }                                     #: Either[Float, String]
+#     .map_err     { |failure| failure.to_sym }                               #: Either[Float, Symbol]
+#     .map         { |value_or_failure| value_or_failure.to_s }               #: Either[String, String]
+#     .pipe        { |value| Ok.new(value.to_i) }                             #: Either[Integer, String]
+#     .pipe        { |value| rand(2).even? ? Ok.new(value) : Err.new(99.9) }  #: Either[Integer, String | Float]
+#     .pipe        { |value| Ok.new(value, :tag) }                            #: Either[Integer, String | Float]
+#     .on_ok       { |value| puts "the value is: #{value}" }                  #: Either[Integer, String | Float]
+#     .on_err      { |failure| puts "the failure is: #{failure}" }            #: Either[Integer, String | Float]
+#     .on_ok(:tag) { |value| puts "a tag was matched!" }                      #: Either[Integer, String | Float]
 #
 # @sealed
 # @abstract
@@ -101,7 +101,7 @@ class Either
   #   Err.new(2).map { |x| x.to_s } # => Err("2")
   #
   # @abstract
-  #: [T] { (Value | Failure value_or_failure) -> T } -> Either[T, T]
+  #: [T] { ((Value | Failure) value_or_failure) -> T } -> Either[T, T]
   def map(&block); end
 
   # When an instance of `Ok`, passes `value` to block, and returns a new `Ok`,
@@ -136,7 +136,7 @@ class Either
   #   Err.new(2).pipe { |x| Err(x.to_s) } # => Err(2)
   #
   # @abstract
-  #: [A, B] { (Value value) -> Either[A, B] } -> Either[A, (Failure | B)]
+  #: [A, B] { (Value value) -> Either[A, B] } -> Either[A, Failure | B]
   def pipe(&block); end
 
   # When an instance of `Err`, passes `failure` to block, and returns the
@@ -159,7 +159,7 @@ class Either
   #
   #    ok =  Ok.new(2, :foo)
   #   err = Err.new(2, :foo)
-  #   block = ->(failure) { puts "okay! #{failure}" }
+  #   block = ->(value) { puts "okay! #{value}" }
   #
   #    ok.on_ok(&block)             # =>  Ok(2, :foo) | "okay! 2"
   #    ok.on_ok(:foo, :bar, &block) # =>  Ok(2, :foo) | "okay! 2"

@@ -9,7 +9,7 @@ with pkgs;
 let
   rubyNix = ruby-nix.lib pkgs {
     gemset = ./gemset.nix;
-    ruby = nixpkgs-ruby.packages.${system}."ruby-3.4.3";
+    ruby = nixpkgs-ruby.packages.${system}."ruby-3.4.5";
     gemConfig = defaultGemConfig;
   };
 in

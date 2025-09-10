@@ -197,6 +197,51 @@ class Either
     self
   end
 
+  # When Active Record is available, runs the block in a transaction. If the
+  # block returns an `Err`, the transaction is rolled back. If the block raises
+  # `ActiveRecord::Rollback`, `fallback` is returned.
+  #
+  #   result = Ok.new("email@example.com")
+  #   fallback = Err.new("fallback")
+  #
+  #   User.count # => 0
+  #
+  #   result.pipe_transaction(fallback:) { |email|
+  #     user = User.create!(email:)
+  #
+  #     Err.new("aborted")
+  #   } # => Err("aborted")
+  #
+  #   User.count # => 0
+  #
+  #   valid_result.pipe_transaction(fallback:) { |email|
+  #     User.create!(email:)
+  #
+  #     raise ActiveRecord::Rollback
+  #   } # => Err("fallback")
+  #
+  #   User.count # => 0
+  #
+  #   valid_result.pipe_transaction(fallback:) { |email|
+  #     Ok.new(User.create!(email:))
+  #   } # => Ok(#<User ...>)
+  #
+  #   User.count # => 1
+  #
+  #: [A, B] (fallback: Either[A, B]) { (Value value) -> Either[A, B] } -> Either[A, Failure | B]
+  def pipe_transaction(fallback:, &block)
+    pipe { |val|
+      result = fallback
+
+      ActiveRecord::Base.transaction do
+        result = block.call(val)
+        result.on_err { raise ActiveRecord::Rollback }
+      end
+
+      result
+    }
+  end
+
   # Pipes `self` to `other`, then joins both `value`s into a tuple.
   #
   #    Ok.new(2).zip(Ok.new(3))  # => Ok([2, 3])

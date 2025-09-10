@@ -11,4 +11,7 @@ group :development do
   gem "sorbet"
   gem "sorbet-runtime"
   gem "ruby-lsp", require: false
+  gem "activesupport"
+  gem "activerecord"
+  gem "activejob"
 end

@@ -25,8 +25,10 @@ module UseCase::Checks
   Divide.new.call(2, 3).pipe(&Increment)
   Divide.to_proc
 
-  [Ok.new(2).with_tag(:tag), Err.new("message")]                            #: [Ok[Integer], Err[bot, String]]
+  result = [Ok.new(2).with_tag(:tag), Err.new("message")]                   #: [Ok[Integer], Err[bot, String]]
     .sample                                                                 #: Either[Integer, String]
+
+  result                                                                    #: Either[Integer, String]
     .map_ok      { |value| value.to_f }                                     #: Either[Float, String]
     .map_err     { |failure| failure.to_sym }                               #: Either[Float, Symbol]
     .map         { |value_or_failure| value_or_failure.to_s }               #: Either[String, String]
@@ -36,7 +38,8 @@ module UseCase::Checks
     .on_ok       { |value| puts "the value is: #{value}" }                  #: Either[Integer, String | Float]
     .on_err      { |failure| puts "the failure is: #{failure}" }            #: Either[Integer, String | Float]
     .on_ok(:tag) { |value| puts "a tag was matched!" }                      #: Either[Integer, String | Float]
-    .value_or_failure                                                       #: Integer | String | Float
+    .zip(result)                                                            #: Either[[Integer, Integer], String | Float]
+    .value_or_failure                                                       #: Array[Integer] | String | Float
 
   Ok.new(2).value             #: Integer
   Err.new(2).failure          #: Integer

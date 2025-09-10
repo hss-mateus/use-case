@@ -59,6 +59,7 @@ module Tapioca
             class_method: true
           )
 
+          job_scope.create_method("initialize", parameters:, return_type: "void")
           job_scope.create_method("perform", parameters:, return_type:)
           job_scope.create_method("perform_now", parameters:, return_type:, class_method: true)
           job_scope.create_method("perform_later", parameters:, return_type: job_return_type, class_method: true)

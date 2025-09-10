@@ -45,7 +45,7 @@ class Either
   #
   # @abstract
   #: (Symbol? tag) -> self
-  def with_tag(tag); end
+  def with_tag(tag) = raise NotImplementedError
 
   # When an instance of `Ok`, returns the underlying value.
   # Otherwise, raises `UnavailableAttributeError`.
@@ -55,7 +55,7 @@ class Either
   #
   # @abstract
   #: -> Value
-  def value; end
+  def value = raise NotImplementedError
 
   # When an instance of `Err`, returns the underlying value.
   # Otherwise, raises `UnavailableAttributeError`.
@@ -65,7 +65,7 @@ class Either
   #
   # @abstract
   #: -> Failure
-  def failure; end
+  def failure = raise NotImplementedError
 
   # Returns the underlying value.
   #
@@ -74,7 +74,7 @@ class Either
   #
   # @abstract
   #: -> (Value | Failure)
-  def value_or_failure; end
+  def value_or_failure = raise NotImplementedError
 
   # Is an instance of `Ok`?
   #
@@ -83,7 +83,7 @@ class Either
   #
   # @abstract
   #: -> bool
-  def ok?; end
+  def ok? = raise NotImplementedError
 
   # Is an instance of `Err`?
   #
@@ -92,7 +92,7 @@ class Either
   #
   # @abstract
   #: -> bool
-  def err?; end
+  def err? = raise NotImplementedError
 
   # Passes `value_or_failure` to `block`, and returns the corresponding
   # `Either`, assigning the `block` return value to `value_or_failure`.
@@ -102,7 +102,7 @@ class Either
   #
   # @abstract
   #: [T] { ((Value | Failure) value_or_failure) -> T } -> Either[T, T]
-  def map(&block); end
+  def map(&block) = raise NotImplementedError
 
   # When an instance of `Ok`, passes `value` to block, and returns a new `Ok`,
   # assigning the `block` return value to `value`.
@@ -113,7 +113,7 @@ class Either
   #
   # @abstract
   #: [T] { (Value value) -> T } -> Either[T, Failure]
-  def map_ok(&block); end
+  def map_ok(&block) = raise NotImplementedError
 
   # When an instance of `Err`, passes `value` to block, and returns a new `Err`,
   # assigning the `block` return value to `value`.
@@ -124,7 +124,7 @@ class Either
   #
   # @abstract
   #: [T] { (Failure failure) -> T } -> Either[Value, T]
-  def map_err(&block); end
+  def map_err(&block) = raise NotImplementedError
 
   # When an instance of `Ok`, passes `value` to block, and returns the `Either`
   # result returned from the block.
@@ -137,7 +137,7 @@ class Either
   #
   # @abstract
   #: [A, B] { (Value value) -> Either[A, B] } -> Either[A, Failure | B]
-  def pipe(&block); end
+  def pipe(&block) = raise NotImplementedError
 
   # When an instance of `Err`, passes `failure` to block, and returns the
   # `Either` result returned from the block.
@@ -150,7 +150,7 @@ class Either
   #
   # @abstract
   #: [A, B] { (Failure failure) -> Either[A, B] } -> Either[Value | A, B]
-  def or(&block); end
+  def or(&block) = raise NotImplementedError
 
   # When an instance of `Ok`, passes `value` to block.
   # Otherwise, the block doesn't get executed.
@@ -204,6 +204,7 @@ end
 
 #: [out Value < top, out Failure = bot]
 class Ok < Either
+  # @override
   #: Value
   attr_reader :value
 
@@ -264,6 +265,7 @@ end
 
 #: [out Value < bot, out Failure < top]
 class Err < Either
+  # @override
   #: Failure
   attr_reader :failure
 
